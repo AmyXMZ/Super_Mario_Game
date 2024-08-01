@@ -17,7 +17,7 @@ A classic platformer game implemented in Java where players control Mario throug
 
 ### Getting Started
 
-Please compile the Java Files from the Repository at: , and run the game from MyFrame class on your local machine.
+Please compile the Java Files from the Repository at: https://github.com/AmyXMZ/Super_Mario_Game.git, and run the game from MyFrame class on your local machine.
 
 ## Usage
 
