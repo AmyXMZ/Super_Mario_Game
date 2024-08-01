@@ -5,51 +5,56 @@ import com.sxt.util.BackGround;
 import com.sxt.util.StaticValue;
 
 import java.awt.image.BufferedImage;
+/*
+* This class, Mario, enables the player to control the motion of Mario within the game frame. This class contains the methods to enable
+* Mario's movements, including runnning (left or right), jumping, destroying bricks or enemies, and its death
+* */
 
 public class Mario implements Runnable {
-    //用于表示坐标
+    //the x-axis location of Mario
     private int x;
+    //the y-axis location of Mario
     private int y;
-    //用于表示当前状态
+    //represents the current status of Mario
     private String status;
-    //用于显示当前状态对应的图像
+    //represents the image of Mario that matches with its current status
     private BufferedImage show = null;
-    //用于表示马里奥移动速度
+    //how fast Mario can run (speed in the horizontal direction)
     private int xSpeed;
-    //用于表示马里奥跳跃速度
+    //how fast Mario can jump (the speed in its vertical direction)
     private int ySpeed;
-    //定义一个索引,用于取得马里奥的运动图像
+    //Mario's running images
     private int index;
-    //表示马里奥面朝方向
+    //the direction that Mario faces to
     private boolean face_to = true;
-    //表示马里奥上升的时间
+    //the time it takes Mario to rise (jump upward)
     private int upTime = 0;
-    //定义一个BackGround对象，用于获取障碍物信息
+    //new an object in the class BackGround, to obtain information about obstacles
     private BackGround backGround = new BackGround();
 
-    //判断是否到了城堡门口
+    //to see if Mario has arrived at the castle
     private boolean isOK;
 
-    //判断马里奥是否死亡
+    //to see if Mario dies
     private boolean isDeath = false;
-    //表示分数
-    private int score = 0; //消灭敌人+2，消灭方块+1
-    //用来实现马里奥动作
+    //represents current score (defeat an enemy + 2 points, destroy a brick + 1 point)
+    private int score = 0;
+    //enable Mario to move on the frame
     private Thread thread = null; ////Once the thread is started, it runs independently of the main program flow.
 
     @Override
     public void run() {
         while(true){
-            //判断马里奥是否处于障碍物上
+            //to see if Mario is on an obstacle
             boolean onObstacle = false;
-            //判断是否可以向右走
+            //to see if Mario can move to the right
             boolean canRight = true;
-            //判断是否可以往左走
+            //to see if Mario can move to the left
             boolean canLeft = true;
-            //判断马里奥是否到达旗杆位置
-            if (backGround.isFlag() && this.x >= 500){//是否到达第三关旗杆位置
+            //to see if Mario has arrived at the flagpole in level 3 (flagpole x-axis = 500)
+            if (backGround.isFlag() && this.x >= 500){
                 this.backGround.setReach(true);
-                //判断旗子是否下落完成
+                //to see if the flag has been dragged to the ground
                 if (this.backGround.isBase()) {
                     status = "move--right";
                     if (x < 690) {
@@ -58,65 +63,66 @@ public class Mario implements Runnable {
                         isOK = true;
                     }
                 }else{
-                    if (y < 395) { //马里奥在空中
+                    if (y < 395) { //Mario is in the air
                         xSpeed = 0;
                         this.y += 5;
                         status = "jump--right";
                     }
-                    if (y > 395) {//当马里奥落到地上
+                    if (y > 395) {//when Mario has fallen to the ground
                         this.y = 395;
                         status = "stop--right";
                     }
                 }
             }
 
-            //遍历当前场景所有障碍物
+            //iterate through all the obstacles in the current background
             for (int i = 0; i < backGround.getObstacleList().size(); i++){
                 Obstacle ob = backGround.getObstacleList().get(i);
-                //判断马里奥是否位于障碍物上 (yes)
+                //if Mario is on an obstacle
                 if(ob.getY() == this.y + 25 && (ob.getX() > this.x - 30 && ob.getX() < this.x + 25)){
                     onObstacle = true;
                 }
-                //判断是否跳起来顶到砖块
+                //to see if Mario can jump and touch a brick
                 if ((ob.getY() >= this.y - 30 && ob.getY() <= this.y - 20) && (ob.getX() >= this.x - 30 && ob.getX() < this.x + 25)) {
-                    if (ob.getType() == 0) { //可破坏砖块
+                    if (ob.getType() == 0) { //if the brick is destroyable, score += 1
                         backGround.getObstacleList().remove(ob);
                         score += 1;
                     }
-                    upTime = 0; //顶到砖块后立刻下落
+                    upTime = 0; //when Mario hits a brick, it immediately falls to the ground
                 }
-                //判断是否可以往右走
-                if (ob.getX() == this.x + 25 && (ob.getY()) > this.y - 30 && ob.getY() < this.y + 25) {//if true,说明右侧有障碍物
+                //to see if Mario can move to the right
+                if (ob.getX() == this.x + 25 && (ob.getY()) > this.y - 30 && ob.getY() < this.y + 25) {//if true,it cannot move to the right because of the presence of obstacles
                     canRight = false;
                 }
-                //判断是否可以往左走
-                if (ob.getX() == this.x - 30 && (ob.getY() > this.y - 30 && ob.getY() < this.y + 25)) { //if true,说明左侧有障碍物
+                //to see if Mario can move to the left
+                if (ob.getX() == this.x - 30 && (ob.getY() > this.y - 30 && ob.getY() < this.y + 25)) { //if true,it cannot move to the left because of the presence of obstacles
                     canLeft = false;
                 }
             }
-            //判断马里奥是否碰到敌人死亡或者踩死蘑菇敌人
+            //to see if Mario destroys an enemy or gets destroyed by an enemy and dies
             for (int i = 0; i < backGround.getEnemyList().size(); i++){
-                Enemy e = backGround.getEnemyList().get(i); //用e存储当前敌人
-                if (e.getY() == this.y + 20 && (e.getX() - 25 <= this.x && e.getX() + 35 >= this.x)){ //判断是否在敌人上方
-                    if (e.getType() == 1){//蘑菇敌人
+                Enemy e = backGround.getEnemyList().get(i); //e refers to the current enemy
+                if (e.getY() == this.y + 20 && (e.getX() - 25 <= this.x && e.getX() + 35 >= this.x)){ //to see if Mario is above enemy
+                    if (e.getType() == 1){//type 1 == mushroom enemy
                         e.death();
                         score += 2;
                         upTime = 3;
                         ySpeed = -10;
-                    }else if (e.getType() == 2){//食人花敌人
-                        //马里奥死亡
+                    }else if (e.getType() == 2){//type 2 == Piranha flower
+                        //Mario dies if touches a Piranha flower
                         death();
                     }
                 }
                 if ((e.getX() + 35 > this.x && e.getX() - 25 < this.x) && (e.getY() + 35 > this.y && e.getY() - 20 < this.y)){
-                    //马里奥死亡
+                    //Mario dies
                     death();
                 }
             }
 
-            //进行马里奥跳跃动作
-            if (onObstacle && upTime == 0){ //只要处于空中uptime就不等于0
-                if (status.indexOf("left") != -1){ //contains "left"
+            //Mario jumps
+            //Mario is on an obstacle
+            if (onObstacle && upTime == 0){ //as long as Mario is in the air, the upTime != 0
+                if (status.indexOf("left") != -1){
                     if (xSpeed != 0){
                         status = "move--left";
                     }else{
@@ -129,46 +135,46 @@ public class Mario implements Runnable {
                         status = "stop--right";
                     }
                 }
-            } else{ //位于空中或障碍物上
-                if (upTime != 0){//当uptime=0，上升到最高点
+            } else{ //Mario is in the air
+                if (upTime != 0){
                     upTime--;
                 }else {
                     fall();
                 }
                 y += ySpeed;
             }
-            if ((canLeft && xSpeed < 0) || (canRight && xSpeed > 0)){ //是否处于运动状态
-                x += xSpeed;//通过坐标轴变化实现马里奥运动
-                //判断是否到达了最左边
+            if ((canLeft && xSpeed < 0) || (canRight && xSpeed > 0)){ //to see if Mario is in motion
+                x += xSpeed;//enable movement of Mario by changing its x-axis
+                //Mario cannot go beyond the frame, it will stop at x=0
                 if (x < 0){
                     x = 0;
                 }
             }
-            //判断马里奥是否移动状态
+            //to see if Mario's current status is "move"
             if (status.contains("move")){
                 index = index == 0 ? 1 : 0;
             }
-            //判断是否向左移动 (两张图片,用index = 0 or 1 来实现)
+            //if Mario moves to the left, its running images will be shown by two images (index = 0 or 1)
             if ("move--left".equals(status)){
                 show = StaticValue.run_L.get(index);
             }
-            //判断是否向右移动(两张图片,用index = 0 or 1 来实现)
+            //if Mario moves to the right, its running images will be shown by two images (index = 0 or 1)
             if ("move--right".equals(status)){
                 show = StaticValue.run_R.get(index);
             }
-            //判断是否向左停止
+            //if Mario stops while facing left
             if ("stop--left".equals(status)){
                 show = StaticValue.stand_L;
             }
-            //判断是否向右停止
+            //if Mario stops while facing right
             if ("stop--right".equals(status)){
                 show = StaticValue.stand_R;
             }
-            //判断是否向左跳
+            //show image of Mario jumping to its left
             if ("jump--left".equals(status)){
                 show = StaticValue.jump_L;
             }
-            //判断是否向右跳跃
+            //show image of Mario jumping to its right
             if ("jump--right".equals(status)){
                 show = StaticValue.jump_R;
             }
@@ -180,10 +186,10 @@ public class Mario implements Runnable {
         }
     }
 
-    public Mario() {//无参数constructor
+    public Mario() {//default constructor for Mario class
     }
 
-    public Mario(int x, int y) {//有参数constructor,每关开始by default Mario向右
+    public Mario(int x, int y) {//constructor with 2 parameters, and by default Mario faces to its right at the start of each level
         this.x = x;
         this.y = y;
         show = StaticValue.stand_R;
@@ -192,59 +198,59 @@ public class Mario implements Runnable {
         thread.start();
     }
 
-    //马里奥向左移动
+    //Mario runs to the left
     public void leftMove() {
-        //马里奥速度改变
+
         xSpeed = -5;
-        //判断马里奥是否碰到旗子
+        //Mario will stop if it reaches the flagpole
         if (backGround.isReach()){
             xSpeed = 0;
         }
-        //判断是否位于空中(处于空中无法移动)
+        //to see if Mario is in the air, because in this status it cannot move to any direction until it returns back to the ground
         if(status.indexOf("jump") != -1){
             status = "jump--left";
         }else{
             status = "move--left";
         }
     }
-    //马里奥向右移动
+    //Mario move to the right
     public void rightMove() {
-        //马里奥速度改变
+
         xSpeed = 5;
-        //判断马里奥是否碰到旗子
+        //Mario stops if it reaches the flagpole
         if (backGround.isReach()){
             xSpeed = 0;
         }
-        //判断是否位于空中
+        //similar as leftMove(), if Mario is in the air it cannot move to any direction until returns to the ground
         if(status.indexOf("jump") != -1){
             status = "jump--right";
         }else{
             status = "move--right";
         }
     }
-    //马里奥向左停止
+    //Mario stops and faces left
     public void leftStop() {
-        //马里奥速度改变 (0)
+
         xSpeed = 0;
-        //判断是否位于空中
-        if(status.indexOf("jump") != -1){//含有的话处于空中
+        //to see if it's in the air
+        if(status.indexOf("jump") != -1){
             status = "jump--left";
         }else{
             status = "stop--left";
         }
     }
-    //马里奥向右停止
+    //Mario stops and faces right
     public void rightStop() {
-        //马里奥速度改变 (0)
+
         xSpeed = 0;
-        //判断是否位于空中
+
         if(status.indexOf("jump") != -1){
             status = "jump--right";
         }else{
             status = "stop--right";
         }
     }
-    //马里奥跳跃方法
+    //enabling Mario to jump (left or right)
     public void jump(){
         if (status.indexOf("jump") == -1){
             if (status.indexOf("left") != -1){
@@ -255,12 +261,12 @@ public class Mario implements Runnable {
             ySpeed = -10;
             upTime = 10;
         }
-        //判断马里奥是否碰到旗子
+        //stop jumping up if Mario reaches the flagpole
         if (backGround.isReach()){
             ySpeed = 0;
         }
     }
-    //马里奥下落的方法
+    //Mario falls to the ground after jumping
     public void fall(){
         if (status.indexOf("left") != -1){
             status = "jump-left";
@@ -269,7 +275,7 @@ public class Mario implements Runnable {
         }
         ySpeed = 10;
     }
-    //马里奥死亡的方法
+    //to see if Mario dies
     public void death(){
         isDeath = true;
     }

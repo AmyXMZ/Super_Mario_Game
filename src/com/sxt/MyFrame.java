@@ -12,50 +12,55 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 
-//创建一个游戏frame，然后把各种图片光标加载进来
+
+/**
+ * The class MyFrame extends JFrame to combine two interfaces to be able to run in a separate thread and react to key activities.
+ * This class creates a fixed frame allowing the game to run.
+*/
 public class MyFrame extends JFrame implements KeyListener, Runnable {
 
-    //存储所有背景
+    //store all background images
     private List<BackGround> allBg = new ArrayList<>();
-    //存储当前背景
+    //store the current background image
     private BackGround nowBg = new BackGround(); //use constructor with no parameters
-    //用于双缓存
+    //used for double caching
     private Image offScreenImage = null;
 
-    //马里奥对象
+    //create a new Mario class object
     private Mario mario = new Mario();
-    //实现马里奥移动
+    //allow the object Mario to move on the frame
     private Thread thread = new Thread(this);
     public MyFrame() {
-        //设置窗口的大小为800 * 600
+        //setting the size of the frame
         this.setSize(800,600);
-        //设置窗口居中显示
+        //set the frame to be centered on the screen
         this.setLocationRelativeTo(null);
-        //设置窗口的可见性
+        //set the visibility of the screen
         this.setVisible(true);
-        //设置点击窗口上的关闭键,结束程序
+        //allow the player to exit the game when they click the close button on the upper right hand corner
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //设置窗口大小不可变
+        //disable the frame resizability
         this.setResizable(false);
-        //向窗口对象添加键盘监听器
+        //add to the frame the keylisterner (so that Mario can react to the keys pressed by the player)
         this.addKeyListener(this);
-        //设置窗口名称
+        //set the frame title
         this.setTitle("SuperMario");
 
-        //创建完游戏frame之后，初始化各种小图片光标 （但还没有paint上去）
+        //after setting the game frame, initialize all object images
         StaticValue.init();
-        //初始化马里奥
+        //initialize Mario on the frame
         mario = new Mario(10,385);
-        //且创建全部场景
-        for (int i = 1; i <= 3; i++) { //i带进sort
-            allBg.add(new BackGround(i, i==3 ? true:false));//直接构建class BackGround的有参数constructor
+        //initialize all the necessary background images
+        for (int i = 1; i <= 3; i++) {
+            allBg.add(new BackGround(i, i==3 ? true:false));
         }
-        //将第一个场景设置为当前背景
+        //set level 1 background to be the current frame background
         nowBg = allBg.get(0);
-        mario.setBackGround(nowBg);//!使得马里奥能够站在“障碍物”地面上，以及站在砖块这些
-        //绘制图像
+        mario.setBackGround(nowBg);//allowing Mario to be able to "stay" on top of the ground
+        //paint the images onto the frame
         repaint();//used to request that a component or container be redrawn
         thread.start();
+        //set the background music for the game
         new Music();
     }
 
@@ -78,57 +83,57 @@ public class MyFrame extends JFrame implements KeyListener, Runnable {
         //width: The width of the rectangle.
         //height: The height of the rectangle.
 
-        //绘制背景
+        //draw the background image onto the frame
         graphics.drawImage(nowBg.getBgImage(),0,0,this);
-        //绘制敌人
-        for (Enemy e : nowBg.getEnemyList()){//!先绘制敌人再绘制障碍物，因为水管要把食人花盖住
+        //draw the enemy (have to draw the enemy, Piranha flower before the pipe so that it can be covered when it goes down the pipe)
+        for (Enemy e : nowBg.getEnemyList()){
             graphics.drawImage(e.getShow(),e.getX(),e.getY(),this);
         }
-        //绘制分数
+        //draw the current scores
         Color c = graphics.getColor();
         graphics.setColor(Color.BLACK);
         graphics.setFont(new Font("BOLD",Font.BOLD,25));
         graphics.drawString("Current Scores: " + mario.getScore(),300,100);
         graphics.setColor(c);
 
-        //绘制障碍物
+        //draw obstacles
         for (Obstacle ob : nowBg.getObstacleList()){
             graphics.drawImage(ob.getShow(),ob.getX(),ob.getY(),this);
         }
 
-        //绘制城堡 (for 第三关)
+        //draw the castle (for level 3)
         graphics.drawImage(nowBg.getTower(),620,270,this);
 
-        //绘制旗杆 (for 第三关)
+        //draw flagpole (for level 3)
         graphics.drawImage(nowBg.getGan(),500,220,this);
 
-        //绘制马里奥
+        //draw Mario
         graphics.drawImage(mario.getShow(),mario.getX(),mario.getY(),this);
 
-        //将绘制的背景图添加到窗口中
+        //add the drawn images to the frame
         g.drawImage(offScreenImage,0,0,this);
     }
 
     @Override
     public void run() { //runnable interface
-        //马里奥进入下一关并且重复绘制出马里奥
+        // whenever Mario enters the next level, its image will be redrawn and added to the frame at the entry position
         while (true){
             repaint();
             try {
                 Thread.sleep(50);
-                //判断马里奥是否进入下一关,if yes, 重制
-                if (mario.getX() >= 775){ //窗口大小为800，马里奥25，775
+                //redraw Mario if it reaches 775 on the x-axis on the frame (the max size on the x-axis of the frame is 800)
+                if (mario.getX() >= 775){
                     nowBg = allBg.get(nowBg.getSort());//！
                     mario.setBackGround(nowBg);
                     mario.setX(10);
                     mario.setY(395);
                 }
-                //判断马里奥是否死亡
+                //if Mario dies, exit the game
                 if (mario.isDeath()){
                     JOptionPane.showMessageDialog(this, "Game Over");
                     System.exit(0);
                 }
-                //判断游戏是否结束
+                //if Mario clears the game successfully (all 3 levels), then exit the game
                 if (mario.isOK()) {
                     JOptionPane.showMessageDialog(this, "Congradulations! You have reached the goal!");
                     System.exit(0);
@@ -145,16 +150,16 @@ public class MyFrame extends JFrame implements KeyListener, Runnable {
     }
 
     @Override
-    public void keyPressed(KeyEvent e) { //当键盘按下时调用
-        //实现向右移动
+    public void keyPressed(KeyEvent e) { //called when the key is pressed
+        //control Mario and move it to the right
         if (e.getKeyCode() == 39){
             mario.rightMove();;
         }
-        //向左移动
+        //move Mario to the left
         if (e.getKeyCode() == 37){
             mario.leftMove();
         }
-        //跳跃
+        //Mario jumps
         if (e.getKeyCode() == 38){
             mario.jump();
         }
@@ -162,12 +167,12 @@ public class MyFrame extends JFrame implements KeyListener, Runnable {
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {//当松开键盘时调用
-        //向左停止
+    public void keyReleased(KeyEvent e) {//called when the keys have been released
+        //stop to the left
         if (e.getKeyCode() == 37){
             mario.leftStop();
         }
-        //向右停止
+        //stop to the right
         if (e.getKeyCode() == 39){
             mario.rightStop();
         }

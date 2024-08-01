@@ -8,24 +8,25 @@ import java.awt.image.BufferedImage;
 
 public class Enemy implements Runnable {
 
-    //储存当前坐标
+    //current location on the frame
     private int x,y;
 
-    //储存敌人类型
+    //the enemy types
     private int type;
-    //判断敌人运动方向
+    //the direction (left or right, up or down) that the enemy moves
     private boolean face_to = true;
-    //用于显示敌人的当前图像
+    //display the image of the current enemy
     private BufferedImage show;
-    //定义一个背景对象
+    //background
     private BackGround bg;
-    //食人花运动极限范围
+    //the upper bound limit that the Piranha flower can move
     private int max_up = 0;
+    //the lower bound limit that the Piranha flower can move
     private int max_down = 0;
-    //当前图片状态
+
     private int image_type = 0;
     private Thread thread = new Thread(this);
-    //蘑菇敌人constructor
+    //the constructor of mushroom enemy
     public Enemy (int x, int y, boolean face_to, int type, BackGround bg) {
         this.x = x;
         this.y = y;
@@ -35,7 +36,7 @@ public class Enemy implements Runnable {
         show = StaticValue.mogu.get(0);
         thread.start();
     }
-    //食人花敌人constructor
+    //the constructor of Piranha flower
     public Enemy (int x, int y, boolean face_to, int type, int max_up, int max_down,BackGround bg){
         this.x = x;
         this.y = y;
@@ -52,26 +53,26 @@ public class Enemy implements Runnable {
     @Override
     public void run() {
         while (true) {
-            //判断是否是蘑菇敌人
-            if (type == 1) { //1是蘑菇敌人
+            //to see if the enemy is the mushroom
+            if (type == 1) { //type 1 indicates mushroom enemy
                 if (face_to) { //true: move left
                     this.x -= 2;
-                }else {
+                }else {//move right
                     this.x += 2;
                 }
                 image_type = image_type == 1 ? 0 : 1;
                 show = StaticValue.mogu.get(image_type);
             }
-            //定义两个布尔变量
+
             boolean canLeft = true;
             boolean canRight = true;
             for (int i = 0; i < bg.getObstacleList().size(); i++) {
                 Obstacle ob1 = bg.getObstacleList().get(i);
-                //判断是否可以向右走
-                if (ob1.getX() == this.x + 36 && (ob1.getY() + 65 > this.y && ob1.getY() - 35 < this.y)) {//if yes: 右侧有障碍物
+                //to see if it can move to the right
+                if (ob1.getX() == this.x + 36 && (ob1.getY() + 65 > this.y && ob1.getY() - 35 < this.y)) {//if yes, it means there is obstacle on its right, cannot further move right
                     canRight = false;
                 }
-                //判断是否可以向左走
+                //to see if it can move to the left
                 if (ob1.getX() == this.x - 36 && (ob1.getY() + 65 > this.y && ob1.getY() - 35 < this.y)){
                     canLeft = false;
                 }
@@ -82,7 +83,7 @@ public class Enemy implements Runnable {
             else if ((!face_to) && (!canRight || this.x == 764)) {
                 face_to = true;
             }
-            //判断是否是食人花敌人
+            //if type 2, the enemy is Piranha flower
             if (type == 2) {
                 if (face_to){
                     this.y -= 2;
@@ -90,9 +91,9 @@ public class Enemy implements Runnable {
                     this.y += 2;
                 }
                 image_type = image_type == 1 ? 0 : 1;
-                //食人花是否移动到上极限位置
+                //to see if the Piranha flower has moved to its upper bound location
                 if (face_to && (this.y == max_up)){
-                    face_to = false; //将其向下移动
+                    face_to = false; //if yes, moves downward
                 }
                 if ((!face_to) && (this.y == max_down)){
                     face_to = true;
@@ -106,9 +107,9 @@ public class Enemy implements Runnable {
             }
         }
     }
-    //死亡方法：蘑菇可杀死，食人花不能
+    //the ways that the enemies die (note: mushroom enemy can be killed, but Piranha flower can't)
     public void death () {
-        show = StaticValue.mogu.get(2);//蘑菇死亡时图片
+        show = StaticValue.mogu.get(2);//show the image when the mushroom dies
         this.bg.getEnemyList().remove(this);
     }
     public int getX() {

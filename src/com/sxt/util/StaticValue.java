@@ -6,60 +6,64 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * This class, StaticValue, reads the images of all the objects including backgrounds, enemies, obstacles, and Mario in all
+ * kinds of different actions. And then all these images are initialized
+ */
 
 public class StaticValue {
 
-    //背景
+    //background image
     public static BufferedImage bg = null;
     public static BufferedImage bg2 = null;
     //Mario jumps left
     public static BufferedImage jump_L = null;
     //Mario jumps right
     public static BufferedImage jump_R = null;
-    //Mario向左站立
+    //Mario to_the_left image
     public static BufferedImage stand_L = null;
-    //Mario向右站立
+    //Mario to_the_right image
     public static BufferedImage stand_R = null;
-    //城堡
+    //the image of castle
     public static BufferedImage tower = null;
-    //旗杆
+    //flagpole
     public static BufferedImage gan = null;
-    //障碍物
+    //obstacle (bricks)
     public static List<BufferedImage> obstacle = new ArrayList<>();
-    //马里奥左跑
+    //Mario runs to the left
     public static List<BufferedImage> run_L = new ArrayList<>();
-    //马里奥右跑
+    //runs to the right
     public static List<BufferedImage> run_R = new ArrayList<>();
-    //蘑菇敌人
+    //mushroom images
     public static List<BufferedImage> mogu = new ArrayList<>();
-    //食人花敌人
+    //Piranha flower images
     public static List<BufferedImage> flower = new ArrayList<>();
-    //路径的前缀，方面后续调用
+    //the dic path where all the images are stored
     public static String path = System.getProperty("user.dir") + "/src/images/";
-    //初始化图片方法
+    //to initialize images
     public static void init() {
         try {
-            //加载单个的图片
-            //加载背景图片
+            //load single image
+            //load background image
             bg = ImageIO.read(new File(path + "bg.png"));
             bg2 = ImageIO.read(new File(path + "bg2.png"));
-            //加载Mario向左站立
+            //load Mario to_the_left image
             stand_L = ImageIO.read(new File(path + "s_mario_stand_L.png"));
-            //加载Mario向右站立
+            //load Mario to_the_right image
             stand_R = ImageIO.read(new File(path + "s_mario_stand_R.png"));
-            //加载马里奥向左跳
+            //load image of Mario jumps to the left
             jump_L = ImageIO.read(new File(path + "s_mario_jump1_L.png"));
-            //加载马里奥向右跳
+            //load image of Mario jumps to the right
             jump_R = ImageIO.read(new File(path + "s_mario_jump1_R.png"));
-            //加载城堡
+            //load the image of castle
             tower = ImageIO.read(new File(path + "tower.png"));
-            //加载旗杆
+            //load the image of flagpole
             gan = ImageIO.read(new File(path + "gan.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //以下为加载多个图片
-        //加载马里奥向左跑
+        //load multiple images
+        //load images of Mario running to the left
         for (int i = 1; i <= 2; i++) {
             try {
                 run_L.add(ImageIO.read(new File(path + "s_mario_run" + i + "_L.png")));
@@ -68,7 +72,7 @@ public class StaticValue {
             }
         }
 
-        //加载马里奥向右跑
+        //load images of Mario running to the right
         for (int i = 1; i <= 2; i++) {
             try {
                 run_R.add(ImageIO.read(new File(path + "s_mario_run" + i + "_R.png")));
@@ -77,15 +81,15 @@ public class StaticValue {
             }
         }
 
-        //加载障碍物
+        //load the images of obstacles (three different types of bricks)
         try {
-            obstacle.add(ImageIO.read(new File(path + "brick.png")));//可破坏砖块: type 0
-            obstacle.add(ImageIO.read(new File(path + "soil_base.png"))); //下地面 type 1
-            obstacle.add(ImageIO.read(new File(path + "soil_up.png"))); //上地面 type 2
+            obstacle.add(ImageIO.read(new File(path + "brick.png")));//destroyable brick: type 0
+            obstacle.add(ImageIO.read(new File(path + "soil_base.png"))); //lower ground brick: type 1
+            obstacle.add(ImageIO.read(new File(path + "soil_up.png"))); //upper ground brick: type 2
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //加载水管
+        //load the image of pipe
         for (int i = 1; i <=4; i++){
             try {
                 obstacle.add(ImageIO.read(new File(path + "pipe" + i + ".png")));
@@ -93,7 +97,7 @@ public class StaticValue {
                 e.printStackTrace();
             }
         }
-        //加载不可破坏砖块和旗子
+        //load images of brick that cannot be destroyed, as well as the flagpole
         try {
             obstacle.add(ImageIO.read(new File(path + "brick2.png")));
             obstacle.add(ImageIO.read(new File(path + "flag.png")));
@@ -101,7 +105,7 @@ public class StaticValue {
             e.printStackTrace();
         }
 
-        //加载蘑菇敌人
+        //load the images of mushroom enemy
         for (int i = 1; i <= 3; i++) {
             try {
                 mogu.add(ImageIO.read(new File(path + "fungus" + i + ".png")));
@@ -109,7 +113,7 @@ public class StaticValue {
                 e.printStackTrace();
             }
         }
-        //加载食人花敌人
+        //load the images of Piranha flower
         for (int i = 1; i <= 2; i++) {
             try {
                 flower.add(ImageIO.read(new File(path + "flower1." + i + ".png")));

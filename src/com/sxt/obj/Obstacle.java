@@ -4,30 +4,35 @@ import com.sxt.util.BackGround;
 import com.sxt.util.StaticValue;
 
 import java.awt.image.BufferedImage;
-
+/*
+* This class, Obstacle, stores all types of obstacles and selectively display them on the frame with specific background. Thread
+* was used to enable movement of specific obstacles on the frame
+* */
 public class Obstacle implements Runnable{
-    //用于表示坐标
+    //represents the x-axis of the obstacle
     private int x;
+    //represents the y-axis of the obstacle
     private int y;
-    //用于记录障碍物类型
+    //represents the various types of obstacles
     private int type;
-    //用于显示图像
+    //show the images of the obstacles
     private BufferedImage show = null;
-    //定义当前背景对象
+    //show the current background
     private BackGround bg = null;
+    //enable the movement of obstacles on the frame
     private Thread thread = new Thread(this);
 
     public Obstacle() { //constructor with no parameters
     }
-
-    public Obstacle(int x, int y, int type, BackGround bg) { //有参数constructor
+    //constructor with 4 parameters, specifying its location on the frame (x,y), its type, and the level (background) its at
+    public Obstacle(int x, int y, int type, BackGround bg) {
         this.x = x;
         this.y = y;
         this.type = type;
         this.bg = bg;
         show = StaticValue.obstacle.get(type);
-        //如果是旗子的话，启动线程
-        if (type == 8) { //type = 8是旗子
+        //if type == 8, the obstacle is a flag, then enable its motion by starting thread
+        if (type == 8) {
             thread.start();
         }
     }
@@ -58,9 +63,9 @@ public class Obstacle implements Runnable{
         while (true) {
             if (this.bg.isReach()) {
                 if (this.y < 374) {
-                    this.y += 5; //让旗子慢慢下落
+                    this.y += 5; //allowing the flag to slowly descend to the ground
                 }else {
-                    this.bg.setBase(true); //旗子已经在地上，设置为true
+                    this.bg.setBase(true); //stop descending the flag if it's already at the ground level
                 }
             }
             try {
